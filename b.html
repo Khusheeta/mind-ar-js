@@ -1,0 +1,111 @@
+<!-- The three.js is a JavaScript-based WebGL engine. It can run games and other graphic apps directly from the browser. This library has many functions for drawing 3D scenes in our browser. Orbit controls the camera around a target. Scenes allow displaying of the rendered picture by three.js. The scene is displayed on an HTML Canvas Element. It uses WebGL by default.  
+
+
+
+You’ll need to import the Three.js library at the top of your JavaScript program before you start. We can retrieve the library using multiple CDN (content delivery network) services. First, we must establish a scene, a camera, and a renderer to display any 2D or 3D objects. We must declare a constant global variable for all of these. To use its scene (), PerspectiveCamera(), and WebGLRenderer() functions, a new element is assigned to each variable by calling the THREE libraries. 
+
+In three.js, the scene variable is assigned to a new object. Using the scene.add() function, which allows you to add elements, like 3D models and lights, to the scene later in our program. This function adjusts elements in the scene, such as the background color. You’re also passing some arguments by using the PerspectiveCamera() function. This can specify the camera’s field of view (75) and aspect ratio (window.innerWidth / window.innerHeight). 
+
+The renderer variable is used to assign a new WebGL renderer system. The Three.js rendering system is called multiple times by using this variable so that we can perform animations and movement in the scene.  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="module">
+
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.115.0/build/three.module.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.115.0/examples/jsm/controls/OrbitControls.js';
+  
+    //
+    // Set up the ThreeJS environment.
+    //
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+  
+    var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+    camera.position.set( 0, 0, 100 );
+    camera.lookAt( 0, 0, 0 );
+  
+    var scene = new THREE.Scene();
+    
+    let controls = new OrbitControls(camera, renderer.domElement);
+  
+    //
+    // Create the points.
+    //
+    function rose( xLo, xHi, xCount, thetaLo, thetaHi, thetaCount ){
+      let vertex = [];
+      let colors = [];
+      let radius = [];
+      for( let x = xLo; x <= xHi; x += ( xHi - xLo ) / xCount ) {
+        for( let theta = thetaLo; theta <= thetaHi; theta += ( thetaHi - thetaLo ) / thetaCount ) {
+          let phi = ( Math.PI / 2 ) * Math.exp( -theta / ( 8 * Math.PI ) );
+          let X = 1 - ( 1 / 2 ) * ( ( 5 / 4 ) * ( 1 - ( ( 3.6 * theta ) % ( 2 * Math.PI ) ) / Math.PI ) ** 2 - 1 / 4 ) ** 2;
+          let y = 1.95653 * ( x ** 2 ) * ( (1.27689 * x - 1) ** 2 ) * Math.sin( phi );
+          let r = X * ( x * Math.sin( phi ) + y * Math.cos( phi ) ); 
+  
+          //
+          // Fix: Ensure radius is positive, and scale up accordingly...
+          //
+          if ( 0 < r ) {
+          
+            const factor = 20;
+            
+            r = r * factor;
+            radius.push( r );
+            X = X * factor;
+  
+            vertex.push( r * Math.sin( theta ), r * Math.cos( theta ), X * ( x * Math.cos( phi ) - y * Math.sin( phi ) ) );
+          }
+        }
+      }
+      
+      //
+      // For the fun of it, lets adjust the color of the points based on the radius
+      // of the point such that the larger the radius, the deeper the red.
+      //
+      let rLo = Math.min( ...radius );
+      let rHi = Math.max( ...radius );
+      for ( let i = 0; i < radius.length; i++ ) {
+        let clr = new THREE.Color( Math.floor( 0x22 + ( 0xff - 0x22 ) * ( ( radius[ i ] - rLo ) / ( rHi - rLo ) ) ) * 0x10000 + 0x002222 );
+        colors.push( clr.r, clr.g, clr.b );
+      }
+      
+      return [ vertex, colors, radius ];
+    }
+  
+    //
+    // Create the geometry and mesh, and add to the THREE scene.
+    //
+    const geometry = new THREE.BufferGeometry();
+    
+    
+    let [ positions, colors, radius ] = rose( 0, 1, 20, -2 * Math.PI, 15 * Math.PI, 2000 );
+    
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+    geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+  
+    const material = new THREE.PointsMaterial( { size: 4, vertexColors: true, depthTest: false, sizeAttenuation: false } );
+  
+    const mesh = new THREE.Points( geometry, material );
+    scene.add( mesh );
+          
+    //
+    // Render...
+    // 
+    var animate = function () {
+      requestAnimationFrame( animate );
+      renderer.render( scene, camera );
+    };
+  
+    animate();
+  </script>
+</body>
+</html>

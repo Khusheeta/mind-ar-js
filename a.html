@@ -1,0 +1,24 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v6.1.1/dist/aframe-extras.min.js"></script>
+
+    
+</head>
+
+<body>
+    <a-scene>
+
+        <a-entity id="duck1" position="1 0 -5"
+                  animation="property: rotation; to:0 -360 0; loop: true; easing:linear; dur:3000">
+            <a-entity color="#FF0000" scale="0.2 0.2 0.2" position="0 0 1"
+                  animation="property:rotation; to:0 360 0; easing:linear; dur:4000; startEvents: mouseenter">
+                  <a-box color="#FF0000" position="20 0 -10" change-color-on-hover="color: white" scale="2 3 3" collison-check="el: #otherduck; radius: 0.15; other-radius: 0.15;"> </a-box>
+            </a-entity>
+        </a-entity>
+       
+        <a-camera position="0 0.2 1.3"><a-cursor></a-cursor></a-camera>      
+    </a-scene>
+</body>
+</html>
